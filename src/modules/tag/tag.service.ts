@@ -16,12 +16,13 @@ export class TagService {
     return 'This action adds a new tag';
   }
 
-  // findAll(id:number): Promise<TagEntity> {
-  //   // return this.tagRepository.findOne({where:{id}});
-  // }
+  findAll(): Promise<TagEntity[]> {
+    return this.tagRepository.find();
+  }
 
   findOne(id: number) {
     return this.tagRepository.findOne({ where: { id } });
+    
   }
 
   update(id: number, updateTagDto: UpdateTagDto) {

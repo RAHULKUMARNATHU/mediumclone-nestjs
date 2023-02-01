@@ -10,6 +10,7 @@ import {
 import { TagService } from './tag.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
+import { TagEntity } from './entities/tag.entity';
 
 @Controller('tag')
 export class TagController {
@@ -20,10 +21,13 @@ export class TagController {
     return this.tagService.create(createTagDto);
   }
 
-  // @Get('/get-all')
-  // findAll() {
-  //   return this.tagService.findAll();
-  // }
+  @Get('/get-all')
+  async findAll():Promise<{tags:string[]}> {
+    const tags = await this.tagService.findAll();
+    return {
+      tags:tags.map((tag) =>tag.name)
+    }
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
