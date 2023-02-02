@@ -3,9 +3,13 @@ import { hash } from 'bcrypt';
 import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'users' })
-export class User {
+export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
+
+
+  @Column()
+  username : string;
 
   @Column()
   email: string;
@@ -20,7 +24,7 @@ export class User {
   password: string;
 
   @BeforeInsert()
-  async setPassword(password: string) {
+  async hashPassword(password: string) {
     const salt = await bcrypt.genSalt();
     this.password = await bcrypt.hash(password || this.password, salt);
   }

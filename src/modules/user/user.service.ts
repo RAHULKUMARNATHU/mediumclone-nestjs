@@ -1,19 +1,42 @@
+import { JWT_SECRET } from '../../config';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { sign } from 'jsonwebtoken';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { UserEntity } from './entities/user.entity';
+import { UserResponseInterface } from './types/userResponse.interface';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(User) private readonly userRepository :Repository<User>){}
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+  ) {}
   async create(createUserDto: CreateUserDto) {
-    const newUser = new User();
-    Object.assign(newUser ,createUserDto);
+    const newUser = new UserEntity();
+    Object.assign(newUser, createUserDto);
+    return await this.userRepository.save(newUser);
+  }
 
-
-    return await this.userRepository.save(newUser)
+  generateJwt(user: UserEntity):string {
+    return sign(
+      {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
+      JWT_SECRET,
+    );
+  }
+  buildUserResponse(user: UserEntity):UserResponseInterface {
+    return {
+      user: {
+        ...user,
+        token: this.generateJwt(user),
+      },
+    };
   }
 
   findAll() {
