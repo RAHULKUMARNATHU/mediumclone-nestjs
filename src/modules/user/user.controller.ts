@@ -10,6 +10,7 @@ import {
   UsePipes,
   Req,
   UseGuards,
+  Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -48,19 +49,27 @@ export class UserController {
   @UseGuards(AuthGuard)
   async currentUser(
     @Req() request: ExpressRequest,
-    @User()user:UserEntity,
-    ): Promise<UserResponseInterface> {
-      return this.userService.buildUserResponse(user);
+    @User() user: UserEntity,
+  ): Promise<UserResponseInterface> {
+    return this.userService.buildUserResponse(user);
+  }
+
+  @Put('/user')
+  @UseGuards(AuthGuard)
+  async updateCurrentUser(
+    @User('id') currentUserId: number,
+    @Body('user') updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseInterface> {
+    const user = await this.userService.updateUser(
+      currentUserId,
+      updateUserDto,
+    );
+    return await this.userService.buildUserResponse(user);
   }
 
   @Get(':id')
   findById(@Param('id') id: string) {
     return this.userService.findById(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
   }
 
   @Delete(':id')

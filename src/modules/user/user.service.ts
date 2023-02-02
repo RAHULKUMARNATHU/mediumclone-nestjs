@@ -89,14 +89,18 @@ export class UserService {
     return this.userRepository.findOne({ where: { id } });
   }
 
+  async updateUser(userId: number, updateUserDto: UpdateUserDto):Promise<UserEntity> {
+   const user = await this.findById(userId);
+   Object.assign(user , updateUserDto);
+   return await this.userRepository.save(user);
+  }
+
+
   findAll() {
     return `This action returns all user`;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
+  
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
