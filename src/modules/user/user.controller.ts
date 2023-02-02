@@ -15,7 +15,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseInterface } from './types/userResponse.interface';
 import { LoginUserDto } from './dto/login-user.dto';
-import { ExpressRequest } from '../../types/expressRequest.interface';
+import { ExpressRequest } from '../types/expressRequest.interface';
 import { Request } from 'express';
 
 @Controller('api')
@@ -41,10 +41,11 @@ export class UserController {
   }
 
   @Get('/user')
-  async currentUser(@Req() request: ExpressRequest): Promise<UserResponseInterface> {
+  async currentUser(
+    @Req() request: ExpressRequest,
+  ): Promise<UserResponseInterface> {
     return this.userService.buildUserResponse(request.user);
   }
-
 
   @Get(':id')
   findById(@Param('id') id: string) {

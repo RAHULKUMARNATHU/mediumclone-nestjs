@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { verify } from 'jsonwebtoken';
 import { NextFunction, Response } from 'express';
-import { ExpressRequest } from '../../../types/expressRequest.interface';
+import { ExpressRequest } from '../../types/expressRequest.interface';
 import { JWT_SECRET } from '../../../config';
 import { UserService } from '../user.service';
 
