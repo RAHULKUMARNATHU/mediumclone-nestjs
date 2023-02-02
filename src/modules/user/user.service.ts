@@ -7,6 +7,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { UserResponseInterface } from './types/userResponse.interface';
+import { LoginUserDto } from './dto/login-user.dto';
+import { compare } from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -16,24 +18,27 @@ export class UserService {
   ) {}
   async create(createUserDto: CreateUserDto) {
     const userByEmail = await this.userRepository.findOne({
-      where:{
-        email:createUserDto.email
-      }
-    })
+      where: {
+        email: createUserDto.email,
+      },
+    });
     const userByUsername = await this.userRepository.findOne({
-      where:{
-        username:createUserDto.username
-      }
-    })
-    if(userByEmail || userByUsername){
-      throw new HttpException('Email or Username are taken' , HttpStatus.UNPROCESSABLE_ENTITY)
+      where: {
+        username: createUserDto.username,
+      },
+    });
+    if (userByEmail || userByUsername) {
+      throw new HttpException(
+        'Email or Username are taken',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
     }
     const newUser = new UserEntity();
     Object.assign(newUser, createUserDto);
     return await this.userRepository.save(newUser);
   }
 
-  generateJwt(user: UserEntity):string {
+  generateJwt(user: UserEntity): string {
     return sign(
       {
         id: user.id,
@@ -43,13 +48,41 @@ export class UserService {
       JWT_SECRET,
     );
   }
-  buildUserResponse(user: UserEntity):UserResponseInterface {
+  buildUserResponse(user: UserEntity): UserResponseInterface {
     return {
       user: {
         ...user,
         token: this.generateJwt(user),
       },
     };
+  }
+
+  async login(loginUserDto: LoginUserDto) {
+    const user = await this.userRepository.findOne({
+      where: {
+        email: loginUserDto.email,
+      },
+      select: ['id', 'username', 'email', 'bio', 'image', 'password'],
+    });
+
+    if (!user) {
+      throw new HttpException(
+        'Credentials are not valid',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    const isPasswordCorrect = await compare(
+      loginUserDto.password,
+      user.password,
+    );
+    if (!isPasswordCorrect) {
+      throw new HttpException(
+        'Credentials are not valid',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    delete user.password;
+    return user;
   }
 
   findAll() {
