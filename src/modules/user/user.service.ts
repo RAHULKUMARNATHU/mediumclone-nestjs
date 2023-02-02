@@ -85,12 +85,12 @@ export class UserService {
     return user;
   }
 
-  findAll() {
-    return `This action returns all user`;
+  findById(id: number): Promise<UserEntity> {
+    return this.userRepository.findOne({ where: { id } });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findAll() {
+    return `This action returns all user`;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

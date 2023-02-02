@@ -8,12 +8,15 @@ import {
   Delete,
   ValidationPipe,
   UsePipes,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseInterface } from './types/userResponse.interface';
 import { LoginUserDto } from './dto/login-user.dto';
+import { ExpressRequest } from '../../types/expressRequest.interface';
+import { Request } from 'express';
 
 @Controller('api')
 export class UserController {
@@ -28,7 +31,6 @@ export class UserController {
     return this.userService.buildUserResponse(user);
   }
 
-
   @Post('/login')
   @UsePipes(new ValidationPipe())
   async login(
@@ -38,17 +40,15 @@ export class UserController {
     return this.userService.buildUserResponse(user);
   }
 
-
-
-
-  @Get()
-  findAll() {
-    return this.userService.findAll();
+  @Get('/user')
+  async currentUser(@Req() request: ExpressRequest): Promise<UserResponseInterface> {
+    return this.userService.buildUserResponse(request.user);
   }
 
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  findById(@Param('id') id: string) {
+    return this.userService.findById(+id);
   }
 
   @Patch(':id')
