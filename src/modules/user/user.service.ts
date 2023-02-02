@@ -1,5 +1,5 @@
 import { JWT_SECRET } from '../../config';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { sign } from 'jsonwebtoken';
 import { Repository } from 'typeorm';
@@ -15,6 +15,19 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
   async create(createUserDto: CreateUserDto) {
+    const userByEmail = await this.userRepository.findOne({
+      where:{
+        email:createUserDto.email
+      }
+    })
+    const userByUsername = await this.userRepository.findOne({
+      where:{
+        username:createUserDto.username
+      }
+    })
+    if(userByEmail || userByUsername){
+      throw new HttpException('Email or Username are taken' , HttpStatus.UNPROCESSABLE_ENTITY)
+    }
     const newUser = new UserEntity();
     Object.assign(newUser, createUserDto);
     return await this.userRepository.save(newUser);
