@@ -1,4 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, UseGuards } from '@nestjs/common';
+import { User } from '../user/decorators/user.decorator';
+import { UserEntity } from '../user/entities/user.entity';
+import { AuthGuard } from '../user/guards/auth.guard';
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -7,9 +10,11 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
-  @Post()
-  async create(@Body() createArticleDto: CreateArticleDto) {
-    return this.articleService.create(createArticleDto);
+  @UsePipes(new ValidationPipe())
+  @UseGuards(AuthGuard)
+  @Post('/create')
+  async create(@User()currentUser:UserEntity, @Body('article') createArticleDto: CreateArticleDto) {
+    return await this.articleService.createArticle(currentUser,createArticleDto);
   }
 
   @Get()
