@@ -40,13 +40,20 @@ export class ArticleService {
         '-' +
         ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
   }
+  
+  
+  findBySlug(slug:string):Promise<ArticleEntity >{
+    return this.articleRepository.findOne({where:{slug}})
+  }
+
+
+
+
   findAll() {
     return `This action returns all article`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} article`;
-  }
+  
 
   update(id: number, updateArticleDto: UpdateArticleDto) {
     return `This action updates a #${id} article`;

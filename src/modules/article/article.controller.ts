@@ -24,9 +24,10 @@ export class ArticleController {
     return this.articleService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.articleService.findOne(+id);
+  @Get('/:slug')
+  async getSingleArticle(@Param('slug') slug: string) :Promise<ArticleResponseInterface>{
+    const article = await this.articleService.findBySlug(slug);
+    return this.articleService.buildArticleResponse(article);
   }
 
   @Patch(':id')
