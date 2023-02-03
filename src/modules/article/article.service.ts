@@ -5,6 +5,7 @@ import { UserEntity } from '../user/entities/user.entity';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { ArticleEntity } from './entities/article.entity';
+import { ArticleResponseInterface } from './types/articleResponse.interface';
 
 @Injectable()
 export class ArticleService {
@@ -27,6 +28,9 @@ export class ArticleService {
     return await this.articleRepository.save(article);
   }
 
+  buildArticleResponse(article: ArticleEntity) :ArticleResponseInterface{
+    return{article}
+  }
   findAll() {
     return `This action returns all article`;
   }
