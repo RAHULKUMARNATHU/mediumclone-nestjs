@@ -1,15 +1,21 @@
-import * as bcrypt from 'bcrypt'
+import { ArticleEntity } from 'src/modules/article/entities/article.entity';
+import * as bcrypt from 'bcrypt';
 import { hash } from 'bcrypt';
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity({ name: 'users' })
 export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-
   @Column()
-  username : string;
+  username: string;
 
   @Column()
   email: string;
@@ -20,7 +26,7 @@ export class UserEntity {
   @Column({ default: '' })
   image: string;
 
-  @Column({select:false})
+  @Column({ select: false })
   password: string;
 
   @BeforeInsert()
@@ -28,4 +34,7 @@ export class UserEntity {
     const salt = await bcrypt.genSalt();
     this.password = await bcrypt.hash(password || this.password, salt);
   }
+
+  @OneToMany(() => ArticleEntity, (article) => article.author)
+  articles: ArticleEntity[];
 }
