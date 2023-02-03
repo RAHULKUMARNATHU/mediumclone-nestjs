@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -42,12 +42,33 @@ export class ArticleService {
   }
   
   
-  findBySlug(slug:string):Promise<ArticleEntity >{
-    return this.articleRepository.findOne({where:{slug}})
+  async findBySlug(slug:string):Promise<ArticleEntity >{
+    return await this.articleRepository.findOne({where:{slug}})
+  }
+
+  async deleteArticle(currentUserId:number , slug: string):Promise<DeleteResult>{
+    const article = await this.findBySlug(slug);
+    if(!article){
+      throw new HttpException('Article does not exist' , HttpStatus.NOT_FOUND)
+    }
+    if(article.author.id !== currentUserId){
+      throw new HttpException('You are not authentic author' , HttpStatus.FORBIDDEN)
+    }
+    return this.articleRepository.delete({slug})
   }
 
 
-
+  async updateArticle(slug:string, updateArticleDto: UpdateArticleDto,currentUserId: number):Promise<ArticleEntity> {
+    const article = await this.findBySlug(slug);
+    if(!article){
+      throw new HttpException('Article does not exist' , HttpStatus.NOT_FOUND)
+    }
+    if(article.author.id !== currentUserId){
+      throw new HttpException('You are not authentic author' , HttpStatus.FORBIDDEN)
+    }
+    Object.assign(article,updateArticleDto);
+    return await this.articleRepository.save(article);
+  }
 
   findAll() {
     return `This action returns all article`;
@@ -55,11 +76,6 @@ export class ArticleService {
 
   
 
-  update(id: number, updateArticleDto: UpdateArticleDto) {
-    return `This action updates a #${id} article`;
-  }
+ 
 
-  remove(id: number) {
-    return `This action removes a #${id} article`;
-  }
 }
