@@ -154,6 +154,20 @@ export class ArticleService {
       });
     }
 
+    if (query.favorited) {
+      const author = await this.userRepository.findOne({
+        where: { username: query.favorited },
+        relations: ['favorites'],
+      });
+      const ids = author.favorites.map((el) => el.id);
+      if (ids.length > 0) {
+        queryBuilder.andWhere('articles.id IN (:...ids)', { ids });
+      } else {
+        queryBuilder.andWhere('1=0');
+      }
+      console.log('author', author);
+    }
+
     // if (query.tag) {
     //   queryBuilder.andWhere('articles.tagList LIKE :tag', {
     //     tag: `%${query.tag}`,
