@@ -49,6 +49,31 @@ export class ArticleService {
     return await this.articleRepository.findOne({ where: { slug } });
   }
 
+  async addArticleToFavorites(
+    slug: string,
+    userId: number,
+  ): Promise<ArticleEntity> {
+    const article = await this.articleRepository.findOne({ where: { slug } });
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['favorites'],
+    });
+
+    const isNotFavorited =
+      user.favorites.findIndex(
+        (articleInFavorites) => articleInFavorites.id === article.id,
+      ) === -1;
+
+            
+    if (isNotFavorited) {
+      user.favorites.push(article);
+      article.favoriteCount++;
+      await this.userRepository.save(user);
+      await this.articleRepository.save(article);
+    }
+
+    return article;
+  }
   async deleteArticle(
     currentUserId: number,
     slug: string,
@@ -99,10 +124,7 @@ export class ArticleService {
         where: { username: query.author },
       });
       if (!author) {
-        throw new HttpException(
-          'User not found',
-          HttpStatus.NOT_FOUND,
-        );
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
       queryBuilder.andWhere('articles.authorId = :id', {
         id: author.id,

@@ -3,6 +3,8 @@ import {
   BeforeInsert,
   Column,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -43,4 +45,5 @@ export class ArticleEntity {
 
   @ManyToOne(() => UserEntity, (user) => user.articles ,{eager:true})
   author: UserEntity;
+
 }
