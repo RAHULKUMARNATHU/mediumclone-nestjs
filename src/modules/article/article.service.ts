@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
-import { DataSource, DeleteResult, Repository } from 'typeorm';
+import { DataSource, DeleteResult, Like, Repository } from 'typeorm';
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -14,6 +14,8 @@ export class ArticleService {
   constructor(
     @InjectRepository(ArticleEntity)
     private readonly articleRepository: Repository<ArticleEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
     private dataSource: DataSource,
   ) {}
 
@@ -91,8 +93,45 @@ export class ArticleService {
       .getRepository(ArticleEntity)
       .createQueryBuilder('articles')
       .leftJoinAndSelect('articles.author', 'author');
-    const articles = await queryBuilder.getMany();
+
+    if (query.author) {
+      const author = await this.userRepository.findOne({
+        where: { username: query.author },
+      });
+      if (!author) {
+        throw new HttpException(
+          'User not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      queryBuilder.andWhere('articles.authorId = :id', {
+        id: author.id,
+      });
+    }
+
+    // if (query.tag) {
+    //   queryBuilder.andWhere('articles.tagList LIKE :tag', {
+    //     tag: `%${query.tag}`,
+    //   });
+    // }
+    if (query.tag) {
+      queryBuilder.andWhere([
+        { tagList: Like(`%${query.tag}`) },
+        // { tagList: Like('%node%') },
+      ]);
+    }
+
+    queryBuilder.orderBy('articles.createdAt', 'DESC');
     const articlesCount = await queryBuilder.getCount();
+    if (query.limit) {
+      queryBuilder.limit(query.limit);
+    }
+
+    if (query.offset) {
+      queryBuilder.offset(query.offset);
+    }
+    const articles = await queryBuilder.getMany();
+
     return { articles, articlesCount };
   }
 }
