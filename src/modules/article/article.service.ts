@@ -64,7 +64,6 @@ export class ArticleService {
         (articleInFavorites) => articleInFavorites.id === article.id,
       ) === -1;
 
-            
     if (isNotFavorited) {
       user.favorites.push(article);
       article.favoriteCount++;
@@ -74,6 +73,30 @@ export class ArticleService {
 
     return article;
   }
+
+  async deleteArticleFromFavorites(
+    slug: string,
+    userId: number,
+  ): Promise<ArticleEntity> {
+    const article = await this.articleRepository.findOne({ where: { slug } });
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['favorites'],
+    });
+
+    const articleIndex = user.favorites.findIndex(
+      (articleInFavorites) => articleInFavorites.id === article.id,
+    );
+
+    if (articleIndex >= 0) {
+      user.favorites.splice(articleIndex, 1);
+      article.favoriteCount--;
+      await this.userRepository.save(user);
+      await this.articleRepository.save(article);
+    }
+    return article;
+  }
+
   async deleteArticle(
     currentUserId: number,
     slug: string,
