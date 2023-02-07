@@ -165,7 +165,6 @@ export class ArticleService {
       } else {
         queryBuilder.andWhere('1=0');
       }
-      console.log('author', author);
     }
 
     // if (query.tag) {
@@ -189,8 +188,22 @@ export class ArticleService {
     if (query.offset) {
       queryBuilder.offset(query.offset);
     }
+
+    let favoriteIds: number[] = [];
+    if (currentUserId) {
+      const currentUser = await this.userRepository.findOne({
+        where: { id: currentUserId },
+        relations: ['favorites'],
+      });
+      favoriteIds = currentUser.favorites.map((favorite) => favorite.id);
+    }
+
     const articles = await queryBuilder.getMany();
 
-    return { articles, articlesCount };
+    const articlesWithFavorited = articles.map((article) => {
+      const favorited = favoriteIds.includes(article.id);
+      return { ...article, favorited };
+    });
+    return { articles: articlesWithFavorited, articlesCount };
   }
 }
