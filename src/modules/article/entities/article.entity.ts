@@ -36,7 +36,7 @@ export class ArticleEntity {
   tagList: string[];
 
   @Column({ default: 0 })
-  favoriteCount: number;
+  favoritesCount: number;
 
   @BeforeInsert()
   UpdateTimestamp() {
