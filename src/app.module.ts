@@ -7,9 +7,10 @@ import { UserModule } from './modules/user/user.module';
 import ormconfig from './ormconfig';
 import { AuthMiddleware } from './modules/user/middlewares/auth.middleware';
 import { ArticleModule } from './modules/article/article.module';
+import { ProfileModule } from './modules/profile/profile.module';
 
 @Module({
-  imports: [TagModule, TypeOrmModule.forRoot(ormconfig), UserModule, ArticleModule],
+  imports: [TagModule, TypeOrmModule.forRoot(ormconfig), UserModule, ArticleModule, ProfileModule],
   controllers: [AppController],
   providers: [AppService],
 })
