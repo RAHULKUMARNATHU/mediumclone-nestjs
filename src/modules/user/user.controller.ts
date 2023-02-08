@@ -22,13 +22,14 @@ import { Request } from 'express';
 import { User } from './decorators/user.decorator';
 import { UserEntity } from './entities/user.entity';
 import { AuthGuard } from './guards/auth.guard';
+import { BackendValidationPipe } from '../../shared/pipes/backendValidation.pipe';
 
 @Controller('api')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('/user')
-  @UsePipes(new ValidationPipe())
+  @UsePipes(new BackendValidationPipe())
   async create(
     @Body() createUserDto: CreateUserDto,
   ): Promise<UserResponseInterface> {
@@ -37,7 +38,7 @@ export class UserController {
   }
 
   @Post('/login')
-  @UsePipes(new ValidationPipe())
+  @UsePipes(new BackendValidationPipe())
   async login(
     @Body() loginUserDto: LoginUserDto,
   ): Promise<UserResponseInterface> {

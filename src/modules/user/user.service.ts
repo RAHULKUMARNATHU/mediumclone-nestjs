@@ -17,6 +17,9 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
   async create(createUserDto: CreateUserDto) {
+    const errorResponse = {
+      errors: {},
+    };
     const userByEmail = await this.userRepository.findOne({
       where: {
         email: createUserDto.email,
@@ -27,9 +30,17 @@ export class UserService {
         username: createUserDto.username,
       },
     });
+
+    if (userByEmail) {
+      errorResponse.errors['email'] = 'has already been taken';
+    }
+
+    if (userByUsername) {
+      errorResponse.errors['username'] = 'has already been taken';
+    }
     if (userByEmail || userByUsername) {
       throw new HttpException(
-        'Email or Username are taken',
+        errorResponse,
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
@@ -58,6 +69,12 @@ export class UserService {
   }
 
   async login(loginUserDto: LoginUserDto) {
+    
+    const errorResponse = {
+      errors:{
+        'email or password' :'is invalid'
+      }
+    }
     const user = await this.userRepository.findOne({
       where: {
         email: loginUserDto.email,
@@ -67,7 +84,7 @@ export class UserService {
 
     if (!user) {
       throw new HttpException(
-        'Credentials are not valid',
+        errorResponse,
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
@@ -77,7 +94,7 @@ export class UserService {
     );
     if (!isPasswordCorrect) {
       throw new HttpException(
-        'Credentials are not valid',
+        errorResponse,
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
@@ -89,18 +106,19 @@ export class UserService {
     return this.userRepository.findOne({ where: { id } });
   }
 
-  async updateUser(userId: number, updateUserDto: UpdateUserDto):Promise<UserEntity> {
-   const user = await this.findById(userId);
-   Object.assign(user , updateUserDto);
-   return await this.userRepository.save(user);
+  async updateUser(
+    userId: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserEntity> {
+    const user = await this.findById(userId);
+    Object.assign(user, updateUserDto);
+    return await this.userRepository.save(user);
   }
-
 
   findAll() {
     return `This action returns all user`;
   }
 
-  
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
