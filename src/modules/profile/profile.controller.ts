@@ -30,9 +30,9 @@ export class ProfileController {
   }
 
   @UseGuards(AuthGuard)
-  @Post('/:username/follow')
+  @Delete('/:username/unfollow')
   async unfollowProfile(@User('id') currentUserId: number , @Param('username')profileUsername:string) :Promise<ProfileResponseInterface> {
-    const profile = await this.profileService.followProfile(
+    const profile = await this.profileService.unfollowProfile(
       currentUserId,
       profileUsername,
     );
