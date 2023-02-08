@@ -19,14 +19,24 @@ import { ProfileResponseInterface } from './types/profileResponse.interface';
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
+  @UseGuards(AuthGuard)
   @Post('/:username/follow')
-  follow(@Body() createProfileDto: CreateProfileDto) {
-    return this.profileService.create(createProfileDto);
+  async followProfile(@User('id') currentUserId: number , @Param('username')profileUsername:string) :Promise<ProfileResponseInterface> {
+    const profile = await this.profileService.followProfile(
+      currentUserId,
+      profileUsername,
+    );
+    return this.profileService.buildProfileResponse(profile);
   }
 
-  @Delete('/:username/follow')
-  unFollow(@Body() createProfileDto: CreateProfileDto) {
-    return this.profileService.create(createProfileDto);
+  @UseGuards(AuthGuard)
+  @Post('/:username/follow')
+  async unfollowProfile(@User('id') currentUserId: number , @Param('username')profileUsername:string) :Promise<ProfileResponseInterface> {
+    const profile = await this.profileService.followProfile(
+      currentUserId,
+      profileUsername,
+    );
+    return this.profileService.buildProfileResponse(profile);
   }
 
   @Get(':username')
@@ -41,6 +51,11 @@ export class ProfileController {
     );
     return this.profileService.buildProfileResponse(profile);
   }
+
+
+
+
+
 
   @Get()
   findAll() {
