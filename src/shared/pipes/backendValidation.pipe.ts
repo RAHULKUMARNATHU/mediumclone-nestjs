@@ -19,20 +19,21 @@ export class BackendValidationPipe implements PipeTransform {
     }
 
     const errors = await validate(object);
+
     if (errors.length === 0) {
       return value;
     }
 
-        throw new HttpException(
-          { errors: this.formatErrors(errors)} ,
-          HttpStatus.UNPROCESSABLE_ENTITY,
-        );
-      }
+    throw new HttpException(
+      { errors: this.formatErrors(errors) },
+      HttpStatus.UNPROCESSABLE_ENTITY,
+    );
+  }
 
-      formatErrors(errors: ValidationError[]) {
-        return errors.reduce((acc, error) => {
-          acc[error.property] = Object.values(error.constraints);
-          return acc;
-        }, {});
+  formatErrors(errors: ValidationError[]) {
+    return errors.reduce((acc, error) => {
+      acc[error.property] = Object.values(error.constraints);
+      return acc;
+    }, {});
   }
 }

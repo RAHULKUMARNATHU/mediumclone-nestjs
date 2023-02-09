@@ -102,8 +102,9 @@ export class ArticleService {
   }
 
   async deleteArticle(
-    currentUserId: number,
     slug: string,
+    currentUserId: number,
+    
   ): Promise<DeleteResult> {
     const article = await this.findBySlug(slug);
     if (!article) {

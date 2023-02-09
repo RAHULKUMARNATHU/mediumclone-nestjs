@@ -1,61 +1,55 @@
 import {
+  Body,
   Controller,
   Get,
   Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  ValidationPipe,
-  UsePipes,
+  Put,
   Req,
   UseGuards,
-  Put,
+  UsePipes,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseInterface } from './types/userResponse.interface';
 import { LoginUserDto } from './dto/login-user.dto';
-import { ExpressRequest } from '../types/expressRequest.interface';
 import { Request } from 'express';
+import { ExpressRequest } from '../types/expressRequest.interface';
 import { User } from './decorators/user.decorator';
 import { UserEntity } from './entities/user.entity';
 import { AuthGuard } from './guards/auth.guard';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { BackendValidationPipe } from '../../shared/pipes/backendValidation.pipe';
 
-@Controller('api')
+@Controller()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('/user')
+  @Post('users')
   @UsePipes(new BackendValidationPipe())
-  async create(
-    @Body() createUserDto: CreateUserDto,
+  async createUser(
+    @Body('user') createUserDto: CreateUserDto,
   ): Promise<UserResponseInterface> {
-    const user = await this.userService.create(createUserDto);
+    const user = await this.userService.createUser(createUserDto);
     return this.userService.buildUserResponse(user);
   }
 
-  @Post('/login')
+  @Post('users/login')
   @UsePipes(new BackendValidationPipe())
   async login(
-    @Body() loginUserDto: LoginUserDto,
+    @Body('user') loginDto: LoginUserDto,
   ): Promise<UserResponseInterface> {
-    const user = await this.userService.login(loginUserDto);
+    console.log('loginDto', loginDto);
+    const user = await this.userService.login(loginDto);
     return this.userService.buildUserResponse(user);
   }
 
-  @Get('/user')
+  @Get('user')
   @UseGuards(AuthGuard)
-  async currentUser(
-    @Req() request: ExpressRequest,
-    @User() user: UserEntity,
-  ): Promise<UserResponseInterface> {
+  async currentUser(@User() user: UserEntity): Promise<UserResponseInterface> {
     return this.userService.buildUserResponse(user);
   }
 
-  @Put('/user')
+  @Put('user')
   @UseGuards(AuthGuard)
   async updateCurrentUser(
     @User('id') currentUserId: number,
@@ -65,16 +59,6 @@ export class UserController {
       currentUserId,
       updateUserDto,
     );
-    return await this.userService.buildUserResponse(user);
-  }
-
-  @Get(':id')
-  findById(@Param('id') id: string) {
-    return this.userService.findById(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+    return this.userService.buildUserResponse(user);
   }
 }
