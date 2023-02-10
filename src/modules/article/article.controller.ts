@@ -18,7 +18,8 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { ArticleResponseInterface } from './types/articleResponse.interface';
 import { ArticlesResponseInterface } from './types/articlesResponse.interface';
 import { BackendValidationPipe } from '../../shared/pipes/backendValidation.pipe';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ArticleEntity } from './entities/article.entity';
 
 @ApiTags('Articles')
 @Controller('articles')
@@ -34,6 +35,7 @@ export class ArticleController {
   }
 
   @Get('feed')
+  @ApiSecurity('bearer')
   @UseGuards(AuthGuard)
   async getFeed(
     @User('id') currentUserId: number,
@@ -43,6 +45,7 @@ export class ArticleController {
   }
 
   @Post()
+  @ApiSecurity('bearer')
   @UseGuards(AuthGuard)
   @UsePipes(new BackendValidationPipe())
   async create(
@@ -65,6 +68,7 @@ export class ArticleController {
   }
 
   @Delete(':slug')
+  @ApiSecurity('bearer')
   @UseGuards(AuthGuard)
   async deleteArticle(
     @User('id') currentUserId: number,
@@ -74,6 +78,7 @@ export class ArticleController {
   }
 
   @Put(':slug')
+  @ApiSecurity('bearer')
   @UseGuards(AuthGuard)
   @UsePipes(new BackendValidationPipe())
   async updateArticle(
@@ -91,6 +96,7 @@ export class ArticleController {
   }
 
   @Post(':slug/favorite')
+  @ApiSecurity('bearer')
   @UseGuards(AuthGuard)
   async addArticleToFavorites(
     @User('id') currentUserId: number,
@@ -104,6 +110,7 @@ export class ArticleController {
   }
 
   @Delete(':slug/favorite')
+  @ApiSecurity('bearer')
   @UseGuards(AuthGuard)
   async deleteArticleFromFavorites(
     @User('id') currentUserId: number,
